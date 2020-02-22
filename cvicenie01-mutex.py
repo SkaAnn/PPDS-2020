@@ -15,10 +15,11 @@ class Shared():
 # definicia funkcie vlakna
 def fnc_test(shared):
     while True:
+        shared.mutex.lock()
         if (shared.counter > (shared.end - 1)):
+            shared.mutex.unlock()
             return
         else:
-            shared.mutex.lock()
             shared.elms[shared.counter] += 1
             shared.counter += 1 
             shared.mutex.unlock()
