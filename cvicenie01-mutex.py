@@ -14,14 +14,14 @@ class Shared():
 ## mutex zablokuje cinnost vlakna pomocou mutex.lock() az do odvolania prikazom mutex.unlock()
 # definicia funkcie vlakna
 def fnc_test(shared):
-    shared.mutex.lock()
     while True:
         if (shared.counter > (shared.end - 1)):
             return
         else:
+            shared.mutex.lock()
             shared.elms[shared.counter] += 1
             shared.counter += 1 
-    shared.mutex.unlock()
+            shared.mutex.unlock()
  
 # vytvorenie instancie triedy 'Shared'
 shared = Shared(1_000_000)
