@@ -55,4 +55,5 @@ t2.join()
 
 ## spocitajte vyskyty hodnot a vypiste ich na obrazovku
 ## https://stackoverflow.com/questions/2600191/how-can-i-count-the-occurrences-of-a-list-item
-print([[x,shared.elms.count(x)] for x in set(shared.elms)])
+values = [[x,shared.elms.count(x)] for x in set(shared.elms)]
+print(values)
