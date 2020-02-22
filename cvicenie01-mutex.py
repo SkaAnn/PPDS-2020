@@ -15,14 +15,16 @@ class Shared():
 # definicia funkcie vlakna
 def fnc_test(shared):
     while True:
+        ## vyhradim index pola pre 1 vlakno
         shared.mutex.lock()
-        if (shared.counter > (shared.end - 1)):
-            shared.mutex.unlock()
+        tmp = shared.counter
+        shared.counter += 1
+        shared.mutex.unlock()
+        
+        if (tmp > (shared.end - 1)):           
             return
         else:
-            shared.elms[shared.counter] += 1
-            shared.counter += 1 
-            shared.mutex.unlock()
+            shared.elms[tmp] += 1
  
 # vytvorenie instancie triedy 'Shared'
 shared = Shared(1_000_000)
