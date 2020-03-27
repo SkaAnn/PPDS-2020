@@ -2,13 +2,15 @@
 from fei.ppds import *
 import random
 from time import sleep
- 
+
+
 class SimpleBarrier:
     def __init__(self, N):
         self.N = N          # pocet vlaken ktore sa maju stretnut
         self.counter = 0    # pocitadlo vlaken
         self.mutex = Mutex()
-        self.turnstile1 = Semaphore(0)
+        self.turnstile1 = Semaphore(0)  # medzi R a KO
+        self.turnstile2 = Semaphore(0)  # medzi KO a R
 
     # na to aby sme osetrili predbiehanie sa vlaken, z dosledku N+1 volani bar.signal() pri jednorazovej bariere
     # potrebujeme 2 turnikety
@@ -19,24 +21,34 @@ class SimpleBarrier:
         # ak nie je v mutex, nevieme hodnotu, lebo vlakna sa mozu obiehat turnstile1 <1,N>
         if self.counter == self.N:
             print("n-te vlakno je ", id_t)
-            print("turn1 signal2", id_t)
+            print("turn1 signal", id_t)
             self.turnstile1.signal()
-            sleep(randint(1,10)/10) # musi byt, inak N-te vlakno vsetky predbehne
+            #sleep(randint(1,10)/10) # ak zakomentovane, tak N-te vlakno vsetky predbehne
         self.mutex.unlock()
 
-        print("turn1 wait1", id_t)
+        # 1. bariera medzi R a KO
         self.turnstile1.wait()
-        print("turn1 signal1", id_t)
         self.turnstile1.signal()
 
-        # opravit N+1 signal() pridanim volania wait()
-        # prave jedno vlakno robi wait
+        # opravit N+1 signal() pridanim volania wait() - tiez ich bude N+1
+        # prave jedno vlakno robi wait()
         self.mutex.lock()
+        # n-te vlakno robi dodatkovi wait()
         if self.counter == self.N:
-            print("turn1 wait2", id_t)
+            print("turn1 wait", id_t)
             self.turnstile1.wait()
-            self.counter -= 1
+        self.counter -= 1
+
+        # posledne vlakno otvara za barieru za KO
+        if self.counter == 0:
+            print("turn2 signal")
+            self.turnstile2.signal()
         self.mutex.unlock()
+
+        # 2. bariera medzi KO a R
+        # vsetky vlakna cakaju za kritickou oblastou
+        self.turnstile2.wait()
+        self.turnstile2.signal()
 
 def rendezvous(thread_name):
     sleep(randint(1,10)/10)
