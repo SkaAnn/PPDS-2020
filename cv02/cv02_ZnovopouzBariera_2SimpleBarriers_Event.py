@@ -11,21 +11,25 @@ class SimpleBarrier:
 
     def barrier(self, id_t):
         self.mutex.lock()
+        # vsetky vlakna mozu robit clear pretoze mutex sa odomkne az vtedy ked odide posledne vlakno!!
+        # if self.counter == 0:
+        self.bar.clear()
         self.counter += 1
         if self.counter == self.N:
             print("n-te vlakno je", id_t)
+            self.counter = 0
             self.bar.signal()
             sleep(0.1) # v pripade ze prve vlakno spusta clear(),
             # tak toto vlakno by mohlo zaspat udalost a nastal by deadlock
         self.mutex.unlock()
-        
         self.bar.wait()
-        # kvoli moznemu deadlocku musi spustat clear() posledne vlakno!
+        
+        """# kvoli moznemu deadlocku musi spustat clear() posledne vlakno!
         self.mutex.lock()
         self.counter -= 1
         if self.counter == 0:
             self.bar.clear()
-        self.mutex.unlock()
+        self.mutex.unlock()"""
         
 """
 Vypisovat na monitor budeme pri zamknutom mutexe pomocou
