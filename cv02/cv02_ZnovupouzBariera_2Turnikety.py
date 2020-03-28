@@ -10,7 +10,8 @@ class SimpleBarrier:
         self.counter = 0    # pocitadlo vlaken
         self.mutex = Mutex()
         self.turnstile1 = Semaphore(0)  # medzi R a KO
-        self.turnstile2 = Semaphore(0)  # medzi KO a R
+        # init na 1 aby nedoslo k deadlocku pri n-tom vlakne
+        self.turnstile2 = Semaphore(1)  # medzi KO a R
 
     # na to aby sme osetrili predbiehanie sa vlaken, z dosledku N+1 volani bar.signal() pri jednorazovej bariere
     # potrebujeme 2 turnikety
@@ -21,32 +22,44 @@ class SimpleBarrier:
         # ak nie je v mutex, nevieme hodnotu, lebo vlakna sa mozu obiehat turnstile1 <1,N>
         if self.counter == self.N:
             print("n-te vlakno je ", id_t)
-            print("turn1 signal", id_t)
-            self.turnstile1.signal()
+            print("turn2 zatvor", id_t)
+            # aby sa pocet volani wait() a signal() zhodoval aj u turniketu2
+            self.turnstile2.wait()      # zatvor 2. turniket   
+            print("turn1 otvor", id_t)
+            self.turnstile1.signal()    # otvor 1. turniket    
             #sleep(randint(1,10)/10) # ak zakomentovane, tak N-te vlakno vsetky predbehne
         self.mutex.unlock()
 
         # 1. bariera medzi R a KO
+        print("turn1 caka vlakno", id_t) 
         self.turnstile1.wait()
         self.turnstile1.signal()
 
         # opravit N+1 signal() pridanim volania wait() - tiez ich bude N+1
         # prave jedno vlakno robi wait()
         self.mutex.lock()
-        # n-te vlakno robi dodatkovi wait()
+        """# n-te vlakno robi dodatkovi wait()
         if self.counter == self.N:
             print("turn1 wait", id_t)
-            self.turnstile1.wait()
+            self.turnstile1.wait()"""
         self.counter -= 1
 
         # posledne vlakno otvara za barieru za KO
+        # zaroven posledne vlakno moze robit aj wait(), ktory chyba k N+1 signal() turniketu1 
         if self.counter == 0:
-            print("turn2 signal")
-            self.turnstile2.signal()
+            # odpoved na otazku sl 116 p02
+            # !!! t1.wait() a t2. signal() musi byt v takomto poradi
+            # -> ak naopak tak by boli oba turnikety otvorene
+            print("posledne vlakno", id_t)
+            print("turn1 zatvor", id_t)
+            self.turnstile1.wait()          # zatvor prvy turniket
+            print("turn2 otvor", id_t)
+            self.turnstile2.signal()        # otvor druhy turniket
         self.mutex.unlock()
 
         # 2. bariera medzi KO a R
         # vsetky vlakna cakaju za kritickou oblastou
+        print("turn2 caka vlakno", id_t) 
         self.turnstile2.wait()
         self.turnstile2.signal()
 
@@ -66,14 +79,12 @@ nielen pred vykonanim funkcie 'ko', ale aj
 """
 def barrier_example(barrier, thread_name):
     while True:
-        # bariera pred randezvous
-        # ...
         rendezvous(thread_name)
         # bariera pred ko
         barrier.barrier(thread_name)
         ko(thread_name)
-        # ...
- 
+        # bariera pred randezvous
+        barrier.barrier(thread_name)
 
 def main():
     """
