@@ -3,8 +3,8 @@ from fei.ppds import *
 import random
 from time import sleep
 
-
-class SimpleBarrier:
+# DVOJFAZOVA BARIERA
+class DoubleBarrier:
     def __init__(self, N):
         self.N = N          # pocet vlaken ktore sa maju stretnut
         self.counter = 0    # pocitadlo vlaken
@@ -15,13 +15,13 @@ class SimpleBarrier:
 
     # na to aby sme osetrili predbiehanie sa vlaken, z dosledku N+1 volani bar.signal() pri jednorazovej bariere
     # potrebujeme 2 turnikety
-    def barrier(self, id_t):
+    def barrier_RKO(self, id_t):
         self.mutex.lock()
         self.counter += 1
         # hodnota turnstile1 je urcite na konci cyklu 1
         # ak nie je v mutex, nevieme hodnotu, lebo vlakna sa mozu obiehat turnstile1 <1,N>
         if self.counter == self.N:
-            print("n-te vlakno je ", id_t)
+            print("n-te vlakno", id_t)
             print("turn2 zatvor", id_t)
             # aby sa pocet volani wait() a signal() zhodoval aj u turniketu2
             self.turnstile2.wait()      # zatvor 2. turniket   
@@ -35,6 +35,8 @@ class SimpleBarrier:
         self.turnstile1.wait()
         self.turnstile1.signal()
 
+
+    def barrier_KOR(self, id_t):
         # opravit N+1 signal() pridanim volania wait() - tiez ich bude N+1
         # prave jedno vlakno robi wait()
         self.mutex.lock()
@@ -62,6 +64,7 @@ class SimpleBarrier:
         print("turn2 caka vlakno", id_t) 
         self.turnstile2.wait()
         self.turnstile2.signal()
+        
 
 def rendezvous(thread_name):
     sleep(randint(1,10)/10)
@@ -81,10 +84,10 @@ def barrier_example(barrier, thread_name):
     while True:
         rendezvous(thread_name)
         # bariera pred ko
-        barrier.barrier(thread_name)
+        barrier.barrier_RKO(thread_name)
         ko(thread_name)
         # bariera pred randezvous
-        barrier.barrier(thread_name)
+        barrier.barrier_KOR(thread_name)
 
 def main():
     """
@@ -93,7 +96,7 @@ def main():
     a dat ich ako argumenty kazdemu vlaknu, ktore chceme pomocou nich
     synchronizovat.
     """
-    bar = SimpleBarrier(10)
+    bar = DoubleBarrier(10)
 
     threads = list()
     for i in range(10):
