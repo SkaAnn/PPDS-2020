@@ -1,3 +1,4 @@
+# sl 164 prednaska4b
 # PODMIENKY
 # 1. v jednom case iba 1 vidlicku (1 vidlicku nemozu mat naraz viacery filozofi)
 # 2. nenastal deadlock
@@ -8,10 +9,12 @@ from time import sleep
 from random import randint
 
 class Shared():
-    def __init__(self, N):
+    def __init__(self, N, max_N):
         self.N = N  # pocet vecerajucich filozofov
         # semafor pre kazdu vidlicku (je/nie je obsadena)
         self.forks = [Semaphore(1) for i in range(N)]
+        # casnik = semafor inicializovany na max pocet jediacich
+        self.footman = Semaphore(max_N)
     
     def right(self, i):
         return i
@@ -22,6 +25,7 @@ class Shared():
 # zober vidlicku (zniz semafor)
 def get_forks(shared, i):   # i je pozicia filozofa
     ind_l = shared.left(i)
+    shared.footman.wait()   # musi kym mu jedlo prinesie casnik
     shared.forks[shared.right(i)].wait()
     shared.forks[shared.left(i)].wait()
     print("Filozof", i, "zobral vidlicku", i,"a", ind_l)
@@ -32,6 +36,7 @@ def put_forks(shared, i):
     shared.forks[shared.right(i)].signal()
     shared.forks[shared.left(i)].signal()
     print("Filozof", i, "polozil vidlicku", i,"a", ind_l)
+    shared.footman.signal() # da vediet casnikovi ze uz dojedol a moze priniest niekomu dalsiu porciu
 
 def think(id_t):
     print("Filozof",id_t,"prave premysla")
@@ -52,8 +57,9 @@ def eating_dinner(shared, id_t):
         put_forks(shared, id_t)
 
 def main():
-    N = 5
-    sh = Shared(N)
+    N = 10
+    max_N = 3
+    sh = Shared(N, max_N)
     threads = []
      
     for i in range(N):
