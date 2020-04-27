@@ -22,7 +22,10 @@ def main():
     coprog = complain_about("rano")
     print(coprog)
     # koprogram nastartujem zavolanim funkcie next (pozor na sposob volania)
-    next(coprog)
+    # next(coprog)
+    # alebo spustim pomocou coprog.send(None) - pozor NIE coprog.send(0)!
+    coprog.send(None)
+    
     # funkcionalitu koprogramu vyuzivam pomocou funkcie send()
     # funkcia send ulozi nacitanu hodnotu cez slovo yield do premennej text
     # send() aj close() su volane ako metody objektu, next() nie!
