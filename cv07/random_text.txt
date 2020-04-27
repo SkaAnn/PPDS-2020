@@ -1,0 +1,11 @@
+Text widgets provide advanced capabilities that allow you to edit a multiline text 
+and format the way it has to be displayed, such as changing its color and font.
+You can also use elegant structures like tabs and marks to locate specific sections of 
+the text, and apply changes to those areas. 
+Moreover, you can embed windows and images in the text because this widget was designed to 
+handle both plain and formatted text.
+After applying this method, the given tag is removed from the provided area without 
+deleting the actual tag definition.
+You can use this method to configure the tag properties, which include, 
+justify(center, left, or right), tabs(this property has the same functionality of the Text widget tabs's property), 
+and underline(used to underline the tagged text).
