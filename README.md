@@ -17,3 +17,4 @@ Paralelné programovanie a distribuované systémy </br>
 
 ### 3. časť - Programovanie na grafických kartách (CUDA)
 + [9. cvičenie](https://uim.fei.stuba.sk/i-ppds/9-cvicenie-cuda-pomocou-numba/): CUDA pomocou Numba
++ [10. cvičenie](https://uim.fei.stuba.sk/i-ppds/cvicenie-10-cuda-prudy-a-udalosti/): CUDA prúdy a udalosti
