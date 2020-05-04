@@ -23,7 +23,7 @@ async def open_url(name, url):
     return resp
  
 async def request_greetings():
-    # for cyklus nemozme mat lebo by to znamenalo serializaciu
+    # samotny for cyklus nemozem mat lebo by to znamenalo serializaciu
     # vrati list odpovedi
     responses = await asyncio.gather(*(open_url(i, URLS[i]) for i in range(len(URLS))))
     return responses
